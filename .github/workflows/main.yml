@@ -24,8 +24,8 @@ jobs:
       - name: Set up FTP connection
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          ftp-server: '${{ secrets.BETA_FTP_SERVER }}'
-          ftp-username: '${{ secrets.BETA_FTP_USERNAME }}'
-          ftp-password: '${{ secrets.BETA_FTP_PASSWORD }}'
+          server: '${{ secrets.BETA_FTP_SERVER }}'
+          username: '${{ secrets.BETA_FTP_USERNAME }}'
+          password: '${{ secrets.BETA_FTP_PASSWORD }}'
           local-dir: ./
           server-dir: '${{ secrets.BETA_SERVER_DIR }}'
