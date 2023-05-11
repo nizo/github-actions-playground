@@ -1,6 +1,7 @@
-name: FTP Upload
+name: DEPLOY TO BETA
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
