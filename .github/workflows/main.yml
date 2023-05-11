@@ -1,0 +1,14 @@
+name: FTP Upload
+'on':
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          ref: 'github-actions-playgound'
+      
