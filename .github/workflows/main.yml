@@ -11,4 +11,4 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Update version
-        run: sed -i 's/Version:     1.0.0/Version:     abc/g' file.txt
+        run: sed -i 's/Version:1.0.0/Version:abc/g' file.txt
