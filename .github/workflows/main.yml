@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Update version
+        uses: datamonsters/replace-action
         with:
-          ref: 'github-actions-playgound'
-      
+          files: file.txt
+          replacements: 'Version:     1.0.0,Version:     abc'
