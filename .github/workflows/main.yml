@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Update version
-        run: sed -i 's/Version:1.0.0/Version:${{ env.VERSION_MAJOR}}.${{ env.VERSION_MINOR}}.${{ env.VERSION_PATCH}}/g' file.txt
+        run: sed -i 's/Version:1.0.0/Version:${{ vars.VERSION_MAJOR}}.${{ vars.VERSION_MINOR}}.${{ vars.VERSION_PATCH}}/g' file.txt
 
       - name: Set up FTP connection
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
