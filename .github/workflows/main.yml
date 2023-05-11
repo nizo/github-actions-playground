@@ -22,7 +22,7 @@ jobs:
         run: sed -i 's/Version:1.0.0/Version:$version_major.$version_minor.$version_patch/g' file.txt
 
       - name: Set up FTP connection
-        uses: SamKirkland/FTP-Deploy-Action@4.1.1
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           ftp-server: '${{ secrets.BETA_FTP_SERVER }}'
           ftp-username: '${{ secrets.BETA_FTP_USERNAME }}'
