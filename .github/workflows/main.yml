@@ -26,7 +26,6 @@ jobs:
           majorVersion=$(echo "$version" | jq -r '. | split(".")[0]')
           minorVersion=$(echo "$version" | jq -r '. | split(".")[1]')
           patchVersion=$(echo "$version" | jq -r '. | split(".")[2]')
-          echo "$majorVersion"
 
       - name: Deploy to Beta Environment
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
