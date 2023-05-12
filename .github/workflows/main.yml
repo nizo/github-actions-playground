@@ -16,12 +16,10 @@ jobs:
       - name: Get Current Version
         run: |
           version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')"
-        
-      - name: Update Version
-      
-        run: \
+          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
 
+      - name: Update Version
+        run: |
           majorVersion=$(echo "$version" | jq -r '. | split(".")[0]')
           minorVersion=$(echo "$version" | jq -r '. | split(".")[1]')
           patchVersion=$(echo "$version" | jq -r '. | split(".")[2]')
@@ -29,7 +27,6 @@ jobs:
           patchVersion=$((patchVersion + 1))
 
           sed -i "s/Version:1.0.0/Version:$majorVersion.$minorVersion.$patchVersion/g" file.txt
-
 
       - name: Deploy to Beta Environment
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
