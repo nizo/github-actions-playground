@@ -1,9 +1,11 @@
-name: DEPLOY TO BETA
+name: Deploy to Beta
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Create Patch Release"]
+    types:
+      - completed  
 
 jobs: 
   deploy-to-beta:     

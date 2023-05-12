@@ -1,4 +1,4 @@
-name: DEPLOY TO PRODUCTION SK
+name: Deploy to Production SK
 
 on:
   workflow_dispatch:
