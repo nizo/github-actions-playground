@@ -1,0 +1,33 @@
+name: DEPLOY TO BETA
+
+on:
+  release:
+    types:
+      - created  
+
+jobs: 
+  deploy-to-beta:     
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2   
+
+      - name: Get Current Version
+        id: get-current-version
+        run: |
+          version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
+          echo "::set-output name=version::$version"
+   
+      - name: Update Version in Repository
+        run: |
+          sed -i "s/Version:1\.0\.0/Version:${{ steps.get-current-version.outputs.version }}/g" file.txt
+
+      - name: Deploy to Beta
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.BETA_FTP_SERVER }}
+          username: ${{ secrets.BETA_FTP_USERNAME }}
+          password: ${{ secrets.BETA_FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: ${{ secrets.BETA_SERVER_DIR }}

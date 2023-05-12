@@ -1,0 +1,107 @@
+name: DEPLOY TO PRODUCTION SK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-current-version.outputs.version }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Get Current Version
+        id: get-current-version
+        run: |
+          version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
+          echo "::set-output name=version::$version"
+
+  bump-minor:
+    needs: get-version
+    permissions: write-all
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.update-version.outputs.newVersion }}
+    steps:
+      - name: Update Version
+        id: update-version
+        run: |
+          version="${{ needs.get-version.outputs.version }}"
+          IFS='.' read -ra versionArray <<< "$version"
+          majorVersion="${versionArray[0]}"
+          minorVersion="${versionArray[1]}"
+          patchVersion="${versionArray[2]}"
+
+          minorVersion=$((minorVersion + 1))
+
+          newVersion="$majorVersion.$minorVersion.$patchVersion"
+          echo "::set-output name=newVersion::$newVersion"
+          echo "Bumping to: $newVersion"
+          
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.update-version.outputs.newVersion }}
+          release_name: Release ${{ steps.update-version.outputs.newVersion }}
+          draft: false
+          prerelease: false
+
+  deploy-to-beta:    
+    needs: bump-minor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2   
+
+      - name: Get Current Version
+        id: get-current-version
+        run: |
+          version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
+          echo "::set-output name=version::$version"
+   
+      - name: Update Version in Repository
+        run: |
+          sed -i "s/Version:1\.0\.0/Version:${{ steps.get-current-version.outputs.version }}/g" file.txt
+
+      - name: Deploy to Beta
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.BETA_FTP_SERVER }}
+          username: ${{ secrets.BETA_FTP_USERNAME }}
+          password: ${{ secrets.BETA_FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: ${{ secrets.BETA_SERVER_DIR }}
+
+  deploy-to-production:    
+    needs: bump-minor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2   
+
+      - name: Get Current Version
+        id: get-current-version
+        run: |
+          version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
+          echo "::set-output name=version::$version"
+    
+      - name: Update Version in Repository
+        run: |
+          sed -i "s/Version:1\.0\.0/Version:${{ steps.get-current-version.outputs.version }}/g" file.txt
+
+      - name: Deploy to SK
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.SK_FTP_SERVER }}
+          username: ${{ secrets.SK_FTP_USERNAME }}
+          password: ${{ secrets.SK_FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: ${{ secrets.SK_SERVER_DIR }}
