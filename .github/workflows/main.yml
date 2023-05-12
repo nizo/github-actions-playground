@@ -7,43 +7,71 @@ on:
       - master
 
 jobs:
-  deploy:
-    permissions: write-all
+  get-version:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-current-version.outputs.version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Update Version
-        id: getVersion
+      - name: Get Current Version
+        id: get-current-version
         run: |
           version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
+          echo "::set-output name=version::$version"
 
+  bump-patch:
+    needs: get-version
+    permissions: write-all
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.update-version.outputs.newVersion }}
+    steps:
+      - name: Update Version
+        id: update-version
+        run: |
+          version="${{ needs.get-version.outputs.version }}"
           IFS='.' read -ra versionArray <<< "$version"
-
           majorVersion="${versionArray[0]}"
           minorVersion="${versionArray[1]}"
           patchVersion="${versionArray[2]}"
+
           patchVersion=$((patchVersion + 1))
 
           newVersion="$majorVersion.$minorVersion.$patchVersion"
-
           echo "::set-output name=newVersion::$newVersion"
+          echo "Bumping to: $newVersion"
+          
 
-      - name: Create Realease with Current Version
+      - name: Create Release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.getVersion.outputs.newVersion }}
-          release_name: Release ${{ steps.getVersion.outputs.newVersion }}
+          tag_name: ${{ steps.update-version.outputs.newVersion }}
+          release_name: Release ${{ steps.update-version.outputs.newVersion }}
           draft: false
           prerelease: false
 
+  deploy-to-beta:    
+    needs: bump-patch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2   
+
+      - name: Get Current Version
+        id: get-current-version
+        run: |
+          version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
+          echo "::set-output name=version::$version"
+   
       - name: Update Version in Repository
         run: |
-          sed -i "s/Version:1\.0\.0/Version:${{ steps.getVersion.outputs.newVersion }}/g" file.txt
+          sed -i "s/Version:1\.0\.0/Version:${{ steps.get-current-version.outputs.version }}/g" file.txt
 
       - name: Deploy to Beta Environment
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
