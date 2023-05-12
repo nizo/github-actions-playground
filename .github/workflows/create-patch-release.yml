@@ -1,4 +1,4 @@
-name: CREATE MINOR RELEASE
+name: Create Patch Release
 
 on:
   push:
