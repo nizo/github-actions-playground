@@ -23,7 +23,14 @@ jobs:
       - name: Update Version
         run: |
           version="${{ steps.getVersion.outputs.version }}"
-          majorVersion=$(echo "$version" | jq -r '@sh split(".")[0]')
+          IFS='.' read -ra versionArray <<< "$version"
+          majorVersion="${versionArray[0]}"
+          minorVersion="${versionArray[1]}"
+          patchVersion="${versionArray[2]}"
+
+          patchVersion=$((patchVersion + 1))
+
+          echo "Bumping to: $majorVersion.$minorVersion.$patchVersion"
 
 
 
