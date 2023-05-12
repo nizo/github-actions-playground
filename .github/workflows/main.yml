@@ -22,7 +22,7 @@ jobs:
 
       - name: Update Version
         run: |
-          version=${{ steps.getVersion.outputs.version }}
+          version="${{ steps.getVersion.outputs.version }}"
           majorVersion=$(echo "$version" | jq -r '. | split(".")[0]')
 
       - name: Deploy to Beta Environment
