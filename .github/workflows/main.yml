@@ -15,9 +15,8 @@ jobs:
 
       - name: Get Current Version
         run: |
-          latest_tag=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
-          echo "Latest tag: $latest_tag"
+          version=$(curl --silent --header "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')"
         
       - name: Update Version
       
@@ -29,13 +28,14 @@ jobs:
 
           patchVersion=$((patchVersion + 1))
 
-          sed -i 's/Version:1.0.0/Version:$majorVersion.$minorVersion.$patchVersion/g' file.txt"
+          sed -i "s/Version:1.0.0/Version:$majorVersion.$minorVersion.$patchVersion/g" file.txt
+
 
       - name: Deploy to Beta Environment
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: '${{ secrets.BETA_FTP_SERVER }}'
-          username: '${{ secrets.BETA_FTP_USERNAME }}'
-          password: '${{ secrets.BETA_FTP_PASSWORD }}'
+          server: ${{ secrets.BETA_FTP_SERVER }}
+          username: ${{ secrets.BETA_FTP_USERNAME }}
+          password: ${{ secrets.BETA_FTP_PASSWORD }}
           local-dir: ./
-          server-dir: '${{ secrets.BETA_SERVER_DIR }}'
+          server-dir: ${{ secrets.BETA_SERVER_DIR }}
