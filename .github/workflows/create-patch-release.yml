@@ -5,11 +5,10 @@ on:
     branches:
       - master
 
-jobs:
-  get-version:
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.get-current-version.outputs.version }}
+jobs: 
+  bump-minor:    
+    permissions: write-all
+    runs-on: ubuntu-latest    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -21,17 +20,10 @@ jobs:
           "https://api.github.com/repos/${{ github.repository }}/tags" | jq -r '.[0].name')
           echo "::set-output name=version::$version"
 
-  bump-minor:
-    needs: get-version
-    permissions: write-all
-    runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.update-version.outputs.newVersion }}
-    steps:
       - name: Update Version
         id: update-version
         run: |
-          version="${{ needs.get-version.outputs.version }}"
+          version="${{ steps.get-current-version.outputs.version }}"
           IFS='.' read -ra versionArray <<< "$version"
           majorVersion="${versionArray[0]}"
           minorVersion="${versionArray[1]}"

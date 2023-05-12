@@ -1,9 +1,9 @@
 name: DEPLOY TO BETA
 
 on:
+  workflow_dispatch:
   release:
-    types:
-      - created  
+    types: [published]
 
 jobs: 
   deploy-to-beta:     
