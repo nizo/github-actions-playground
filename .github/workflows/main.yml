@@ -27,10 +27,6 @@ jobs:
           minorVersion=$(echo "$version" | jq -r '. | split(".")[1]')
           patchVersion=$(echo "$version" | jq -r '. | split(".")[2]')
           echo "Bumping to: $majorVersion.$minorVersion.$patchVersion"
-          patchVersion=$((patchVersion + 1))
-          echo "After Bumping to: $majorVersion.$minorVersion.$patchVersion"
-          
-          sed -i "s/Version:1.0.0/Version:$majorVersion.$minorVersion.$patchVersion/g" file.txt
 
       - name: Deploy to Beta Environment
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
