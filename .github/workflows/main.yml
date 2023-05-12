@@ -23,7 +23,10 @@ jobs:
       - name: Update Version
         run: |
           version="${{ steps.getVersion.outputs.version }}"
-          majorVersion=$(echo "$version" | jq -r '. | split(".")[0]')
+          majorVersion=$(echo "$version" | jq -r '@sh split(".")[0]')
+
+
+
 
       - name: Deploy to Beta Environment
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
